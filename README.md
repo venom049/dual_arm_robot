@@ -19,3 +19,5 @@
 现有真机安装、标定和启动流程见 [src/README.md](src/README.md)，控制链路说明见 [src/docs/CONTROL_PIPELINE.md](src/docs/CONTROL_PIPELINE.md)。
 
 当前本机右臂、ROS域74、FACTR2模型与网页的启动入口：[2026-10-10右臂启动说明](src/docs/RIGHT_ARM_NEXT_STARTUP.md)。
+
+空载偏差、卸载残留和末端奇异提示的新版采集/训练代码位于配套 FACTR2 仓库，操作说明：[2026-10-13 NEXT 重采与训练](https://github.com/Ding141/factr2/blob/liyq-dev/docs/operator_guide/NEXT_REVISION_20261013.md)。当前修改已做离线验证，新版真机采集和卸载精度验收尚未执行。
