@@ -202,6 +202,8 @@ bridge 独立手动启动；控制端和标定互斥，进程入口固定白名�
 
 ## NEXT 插值后目标的只读观测（w3_next_v1）
 
+2026-10-14 增加 `/joint_position_controller/stop`（`std_msgs/Empty`）：取消待执行的未来目标，从当前输出 q/v/a 构造限速/限加速度/限 jerk 的停止段，然后保持位置。保持电机 PD 增益、重力补偿和实际 `command_state` 发布。此 ROS 请求不等同于硬件急停。配套 FACTR2 直接位姿采集工具对每个目标仅发送一次完整原生轨迹，并在监测失败时使用此请求。
+
 `JointPositionController` configure 时创建 `~/command_state`，默认解析为
 `/joint_position_controller/command_state`。类型 sensor_msgs/JointState，name 为
 controller 的 joints 原始顺序（单臂 7 或双臂 14），position/velocity 是同一 update

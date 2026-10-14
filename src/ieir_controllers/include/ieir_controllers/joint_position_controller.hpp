@@ -13,6 +13,7 @@
 #include "realtime_tools/realtime_publisher.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
+#include "std_msgs/msg/empty.hpp"
 
 namespace ieir_controllers
 {
@@ -41,6 +42,8 @@ namespace ieir_controllers
  *   kp_gains:  [kp0, kp1, ...]                 # one per joint, same order
  *   kd_gains:  [kd0, kd1, ...]                 # one per joint, same order
  *   command_topic: "/joint_position_command"   # JointTrajectory topic
+ *   ~/stop (std_msgs/Empty): cancel queued goals and brake continuously
+ *     under the same v/a/jerk bounds, preserving motor gains and feedforward.
  *
  * Trajectory semantics:
  *   - header.stamp == 0  -> start "now" (this update() iteration)
@@ -113,6 +116,8 @@ private:
   realtime_tools::RealtimeBuffer<std::shared_ptr<trajectory_msgs::msg::JointTrajectory>>
     traj_buffer_;
   rclcpp::Subscription<trajectory_msgs::msg::JointTrajectory>::SharedPtr traj_sub_;
+  // Explicit bounded braking for a whole goal; motor enable/gains remain active.
+  rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr stop_sub_;
 
   // Allocated during configure; update only tries the lock and writes by index.
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr command_state_pub_;

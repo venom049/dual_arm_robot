@@ -122,6 +122,7 @@ ament_target_dependencies(joint_position_controller
   realtime_tools
   trajectory_msgs
   sensor_msgs
+  std_msgs
 )
 
 # Cartesian Position Controller Plugin

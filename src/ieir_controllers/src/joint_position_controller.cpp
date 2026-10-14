@@ -152,6 +152,14 @@ controller_interface::CallbackReturn JointPositionController::on_configure(
       traj_buffer_.writeFromNonRT(copy);
     });
 
+  stop_sub_ = node->create_subscription<std_msgs::msg::Empty>(
+    "~/stop", rclcpp::SystemDefaultsQoS(),
+    [this](const std_msgs::msg::Empty::SharedPtr) {
+      // Only this callback may install the empty sentinel. A malformed normal
+      // trajectory still goes through valid_message() and cannot request a stop.
+      traj_buffer_.writeFromNonRT(std::make_shared<trajectory_msgs::msg::JointTrajectory>());
+    });
+
   RCLCPP_INFO(node->get_logger(),
               "JointPositionController configured with %zu joint(s); "
               "subscribing to '%s' (trajectory_msgs/JointTrajectory)",
@@ -330,6 +338,17 @@ void JointPositionController::try_pickup_new_trajectory(const rclcpp::Time &now)
   // A monotonically changing pointer avoids clearing a newer non-RT write from update().
   if(latest && *latest && *latest!=consumed_traj_) {
     consumed_traj_=*latest;
+    if(consumed_traj_->points.empty()) {
+      pending_traj_.reset();
+      std::vector<std::vector<TrajectorySpline>> braking(joint_names_.size());
+      for(size_t i=0;i<joint_names_.size();++i) {
+        double q,v,a; sample_setpoint(i,now,q,v,a);
+        braking[i].push_back(stopping_segment(i,0.,q,v,a));
+      }
+      segments_=std::move(braking);
+      active_traj_=consumed_traj_; active_traj_start_=now;
+      return;
+    }
     if(valid_message(*consumed_traj_)) {
       auto stamp=rclcpp::Time(consumed_traj_->header.stamp,now.get_clock_type());
       if(stamp.nanoseconds()==0) stamp=now;

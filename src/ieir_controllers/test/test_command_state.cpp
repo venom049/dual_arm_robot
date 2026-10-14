@@ -166,6 +166,37 @@ protected:
   std::vector<JS> received;
 };
 
+TEST_F(CommandStateTest, ExplicitStopPreservesDerivativesAndCancelsFutureGoal)
+{
+  trajectory(names, {std::vector<double>(7, 0.4)}, {2.0});
+  step(1000000000LL);
+  step(2000000000LL);
+  const double outgoing_q = command_values[0];
+  const double outgoing_v = command_values[1];
+  const double outgoing_a = Peer::acceleration(*controller, 0);
+  ASSERT_GT(outgoing_v, 0.0);
+  // A queued future replacement must not restart the robot after braking.
+  trajectory(names, {std::vector<double>(7, 0.8)}, {2.0}, 10000000000LL);
+  step(2000000000LL);
+  auto stop = observer->create_publisher<std_msgs::msg::Empty>(
+    "/joint_position_controller/stop", rclcpp::SystemDefaultsQoS());
+  ASSERT_TRUE(wait([&]() {return stop->get_subscription_count() == 1;}));
+  stop->publish(std_msgs::msg::Empty());
+  ASSERT_TRUE(wait([&]() {return Peer::pending(*controller);}));
+  step(2000000000LL);
+  EXPECT_NEAR(command_values[0], outgoing_q, 1e-9);
+  EXPECT_NEAR(command_values[1], outgoing_v, 1e-9);
+  EXPECT_NEAR(Peer::acceleration(*controller, 0), outgoing_a, 1e-9);
+  step(9000000000LL);
+  const double stopped_q = command_values[0];
+  EXPECT_NEAR(command_values[1], 0.0, 1e-9);
+  step(13000000000LL);
+  EXPECT_NEAR(command_values[0], stopped_q, 1e-9);
+  EXPECT_NEAR(command_values[1], 0.0, 1e-9);
+  EXPECT_DOUBLE_EQ(command_values[2], 12.0);
+  EXPECT_DOUBLE_EQ(command_values[3], 0.5);
+}
+
 TEST_F(CommandStateTest, CMD01HoldAndCMD10StampFieldsQoS)
 {
   step(1000123456);

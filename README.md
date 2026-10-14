@@ -20,4 +20,4 @@
 
 当前本机右臂、ROS域74、FACTR2模型与网页的启动入口：[2026-10-10右臂启动说明](src/docs/RIGHT_ARM_NEXT_STARTUP.md)。
 
-空载偏差、卸载残留和末端奇异提示的新版采集/训练代码位于配套 FACTR2 仓库，操作说明：[2026-10-13 NEXT 重采与训练](https://github.com/Ding141/factr2/blob/liyq-dev/docs/operator_guide/NEXT_REVISION_20261013.md)。当前修改已做离线验证，新版真机采集和卸载精度验收尚未执行。
+空载偏差、卸载残留和末端奇异提示的新版采集/训练代码位于配套 FACTR2 仓库，操作说明：[直接末端位姿采集与训练](https://github.com/Ding141/factr2/blob/liyq-dev/docs/operator_guide/NEXT_POSE_CAPTURE_20261014.md)。本控制器新增 `/joint_position_controller/stop` 平滑制动；位姿采集桥一次下发完整原生目标，继续记录实际 `command_state`。10 月 14 日已在慢/快 10/12°/s 下完成真机采集，10 月 15 日完成单会话初步训练；高速覆盖、独立会话和接触卸载验收尚未通过。
