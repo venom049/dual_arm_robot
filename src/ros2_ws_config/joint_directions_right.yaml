@@ -1,0 +1,32 @@
+mode: direction
+channel: 1
+identified_at: '2026-09-28T22:36:39'
+directions:
+- name: right_joint_0
+  slot: 0
+  axis_sign: -1
+  direction_verified: true
+- name: right_joint_1
+  slot: 1
+  axis_sign: 1
+  direction_verified: true
+- name: right_joint_2
+  slot: 2
+  axis_sign: 1
+  direction_verified: true
+- name: right_joint_3
+  slot: 3
+  axis_sign: -1
+  direction_verified: true
+- name: right_joint_4
+  slot: 4
+  axis_sign: 1
+  direction_verified: true
+- name: right_joint_5
+  slot: 5
+  axis_sign: 1
+  direction_verified: true
+- name: right_joint_6
+  slot: 6
+  axis_sign: -1
+  direction_verified: true

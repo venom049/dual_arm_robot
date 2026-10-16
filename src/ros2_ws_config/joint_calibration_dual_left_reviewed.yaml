@@ -1,0 +1,70 @@
+channel: 0
+sampling:
+  window_sec: 0.5
+  min_samples: 20
+  max_motion_rad: 0.05
+joints:
+- slot: 0
+  name: left_joint_0
+  motor_type: DM8009
+  limit_side: negative
+  urdf_pos_at_limit: -3.1416
+  reference_review:
+    original_angle_rad: -3.1416
+    confirmed_angle_rad: -3.1416
+    confirmed: true
+- slot: 1
+  name: left_joint_1
+  motor_type: DM8009
+  limit_side: positive
+  urdf_pos_at_limit: 0.4363
+  reference_review:
+    original_angle_rad: 0.4363
+    confirmed_angle_rad: 0.4363
+    confirmed: true
+- slot: 2
+  name: left_joint_2
+  motor_type: DM4340P
+  limit_side: negative
+  urdf_pos_at_limit: -2.618
+  reference_review:
+    original_angle_rad: -2.618
+    confirmed_angle_rad: -2.618
+    confirmed: true
+- slot: 3
+  name: left_joint_3
+  motor_type: DM4340
+  limit_side: positive
+  urdf_pos_at_limit: 1.5708
+  reference_review:
+    original_angle_rad: 1.5708
+    confirmed_angle_rad: 1.5708
+    confirmed: true
+- slot: 4
+  name: left_joint_4
+  motor_type: DM4310
+  limit_side: negative
+  urdf_pos_at_limit: -2.618
+  reference_review:
+    original_angle_rad: -2.618
+    confirmed_angle_rad: -2.618
+    confirmed: true
+- slot: 5
+  name: left_joint_5
+  motor_type: DM4310
+  limit_side: positive
+  urdf_pos_at_limit: -0.8098327729253689
+  reference_review:
+    original_angle_rad: 0.8098
+    confirmed_angle_rad: -0.8098327729253689
+    confirmed: true
+- slot: 6
+  name: left_joint_6
+  motor_type: DM4310
+  limit_side: negative
+  urdf_pos_at_limit: -1.5708
+  reference_review:
+    original_angle_rad: -1.5708
+    confirmed_angle_rad: -1.5708
+    confirmed: true
+reference_reviewed_at: '2026-09-28T22:25:51'

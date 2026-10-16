@@ -1,0 +1,590 @@
+transport: w3
+offsets:
+- name: left_joint_0
+  slot: 0
+  motor_type: DM8009
+  axis_sign: -1.0
+  direction_verified: true
+  zero_offset: -8.466426240539551
+  raw_at_reference: -5.324826240539551
+  urdf_pos_at_reference: -3.1416
+  limit_side: negative
+  reference_confirmed: true
+  visually_verified: false
+  method: manual
+  motion_settings:
+    stall_torque: 0.5
+    kp: 3.0
+    kd: 1.0
+    max_position_error: 0.2
+    effort_abort: 1.0
+    speed: 0.025
+    max_speed: 0.15
+    hard_max_speed: 0.3
+    overspeed_time: 0.1
+    max_travel: 3.5
+    timeout: 180.0
+    stall_time: 1.0
+    stall_span: 0.004
+    min_travel: 0.03
+    repeat_tolerance: 0.015
+    target_tolerance: 0.01
+    return_min_fraction: 0.5
+    feedback_timeout: 0.12
+  return_duration: null
+  retreats: []
+  gain_source: 'manual: gains are not applied'
+  friction_source: 'disabled: manual calibration has no torque feed-forward'
+  friction_model:
+    coulomb_pos: 0.0
+    coulomb_neg: 0.0
+    viscous: 0.0
+    gain: 0.0
+  identified_at: '2026-09-28T22:29:16'
+  channel: 0
+- name: left_joint_1
+  slot: 1
+  motor_type: DM8009
+  axis_sign: 1.0
+  direction_verified: true
+  zero_offset: 2.593950549316406
+  raw_at_reference: 3.0302505493164062
+  urdf_pos_at_reference: 0.4363
+  limit_side: positive
+  reference_confirmed: true
+  visually_verified: false
+  method: manual
+  motion_settings:
+    stall_torque: 0.5
+    kp: 3.0
+    kd: 1.0
+    max_position_error: 0.2
+    effort_abort: 1.0
+    speed: 0.025
+    max_speed: 0.15
+    hard_max_speed: 0.3
+    overspeed_time: 0.1
+    max_travel: 3.5
+    timeout: 180.0
+    stall_time: 1.0
+    stall_span: 0.004
+    min_travel: 0.03
+    repeat_tolerance: 0.015
+    target_tolerance: 0.01
+    return_min_fraction: 0.5
+    feedback_timeout: 0.12
+  return_duration: null
+  retreats: []
+  gain_source: 'manual: gains are not applied'
+  friction_source: 'disabled: manual calibration has no torque feed-forward'
+  friction_model:
+    coulomb_pos: 0.0
+    coulomb_neg: 0.0
+    viscous: 0.0
+    gain: 0.0
+  identified_at: '2026-09-28T22:28:53'
+  channel: 0
+- name: left_joint_2
+  slot: 2
+  motor_type: DM4340P
+  axis_sign: 1.0
+  direction_verified: true
+  zero_offset: -2.2212081260681154
+  raw_at_reference: -4.839208126068115
+  urdf_pos_at_reference: -2.618
+  limit_side: negative
+  reference_confirmed: true
+  visually_verified: false
+  method: manual
+  motion_settings:
+    stall_torque: 0.5
+    kp: 3.0
+    kd: 1.0
+    max_position_error: 0.2
+    effort_abort: 1.0
+    speed: 0.025
+    max_speed: 0.15
+    hard_max_speed: 0.3
+    overspeed_time: 0.1
+    max_travel: 3.5
+    timeout: 180.0
+    stall_time: 1.0
+    stall_span: 0.004
+    min_travel: 0.03
+    repeat_tolerance: 0.015
+    target_tolerance: 0.01
+    return_min_fraction: 0.5
+    feedback_timeout: 0.12
+  return_duration: null
+  retreats: []
+  gain_source: 'manual: gains are not applied'
+  friction_source: 'disabled: manual calibration has no torque feed-forward'
+  friction_model:
+    coulomb_pos: 0.0
+    coulomb_neg: 0.0
+    viscous: 0.0
+    gain: 0.0
+  identified_at: '2026-09-28T22:27:48'
+  channel: 0
+- name: left_joint_3
+  slot: 3
+  motor_type: DM4340
+  axis_sign: 1.0
+  direction_verified: true
+  zero_offset: 2.8392475311279295
+  raw_at_reference: 4.41004753112793
+  urdf_pos_at_reference: 1.5708
+  limit_side: positive
+  reference_confirmed: true
+  visually_verified: false
+  method: manual
+  motion_settings:
+    stall_torque: 0.5
+    kp: 3.0
+    kd: 1.0
+    max_position_error: 0.2
+    effort_abort: 1.0
+    speed: 0.025
+    max_speed: 0.15
+    hard_max_speed: 0.3
+    overspeed_time: 0.1
+    max_travel: 3.5
+    timeout: 180.0
+    stall_time: 1.0
+    stall_span: 0.004
+    min_travel: 0.03
+    repeat_tolerance: 0.015
+    target_tolerance: 0.01
+    return_min_fraction: 0.5
+    feedback_timeout: 0.12
+  return_duration: null
+  retreats: []
+  gain_source: 'manual: gains are not applied'
+  friction_source: 'disabled: manual calibration has no torque feed-forward'
+  friction_model:
+    coulomb_pos: 0.0
+    coulomb_neg: 0.0
+    viscous: 0.0
+    gain: 0.0
+  identified_at: '2026-09-28T22:28:25'
+  channel: 0
+- name: left_joint_4
+  slot: 4
+  motor_type: DM4310
+  axis_sign: 1.0
+  direction_verified: true
+  zero_offset: -0.6762323684692384
+  raw_at_reference: -3.2942323684692383
+  urdf_pos_at_reference: -2.618
+  limit_side: negative
+  reference_confirmed: true
+  visually_verified: false
+  method: manual
+  motion_settings:
+    stall_torque: 0.5
+    kp: 3.0
+    kd: 1.0
+    max_position_error: 0.2
+    effort_abort: 1.0
+    speed: 0.025
+    max_speed: 0.15
+    hard_max_speed: 0.3
+    overspeed_time: 0.1
+    max_travel: 3.5
+    timeout: 180.0
+    stall_time: 1.0
+    stall_span: 0.004
+    min_travel: 0.03
+    repeat_tolerance: 0.015
+    target_tolerance: 0.01
+    return_min_fraction: 0.5
+    feedback_timeout: 0.12
+  return_duration: null
+  retreats: []
+  gain_source: 'manual: gains are not applied'
+  friction_source: 'disabled: manual calibration has no torque feed-forward'
+  friction_model:
+    coulomb_pos: 0.0
+    coulomb_neg: 0.0
+    viscous: 0.0
+    gain: 0.0
+  identified_at: '2026-09-28T22:27:04'
+  channel: 0
+- name: left_joint_5
+  slot: 5
+  motor_type: DM4310
+  axis_sign: -1.0
+  direction_verified: true
+  zero_offset: -1.2361318680791775
+  raw_at_reference: -0.4262990951538086
+  urdf_pos_at_reference: -0.8098327729253689
+  limit_side: positive
+  reference_confirmed: true
+  visually_verified: false
+  method: manual
+  motion_settings:
+    stall_torque: 0.5
+    kp: 3.0
+    kd: 1.0
+    max_position_error: 0.2
+    effort_abort: 1.0
+    speed: 0.025
+    max_speed: 0.15
+    hard_max_speed: 0.3
+    overspeed_time: 0.1
+    max_travel: 3.5
+    timeout: 180.0
+    stall_time: 1.0
+    stall_span: 0.004
+    min_travel: 0.03
+    repeat_tolerance: 0.015
+    target_tolerance: 0.01
+    return_min_fraction: 0.5
+    feedback_timeout: 0.12
+  return_duration: null
+  retreats: []
+  gain_source: 'manual: gains are not applied'
+  friction_source: 'disabled: manual calibration has no torque feed-forward'
+  friction_model:
+    coulomb_pos: 0.0
+    coulomb_neg: 0.0
+    viscous: 0.0
+    gain: 0.0
+  identified_at: '2026-09-28T22:26:39'
+  channel: 0
+- name: left_joint_6
+  slot: 6
+  motor_type: DM4310
+  axis_sign: -1.0
+  direction_verified: true
+  zero_offset: -1.3989450271606445
+  raw_at_reference: 0.17185497283935547
+  urdf_pos_at_reference: -1.5708
+  limit_side: negative
+  reference_confirmed: true
+  visually_verified: false
+  method: manual
+  motion_settings:
+    stall_torque: 0.5
+    kp: 3.0
+    kd: 1.0
+    max_position_error: 0.2
+    effort_abort: 1.0
+    speed: 0.025
+    max_speed: 0.15
+    hard_max_speed: 0.3
+    overspeed_time: 0.1
+    max_travel: 3.5
+    timeout: 180.0
+    stall_time: 1.0
+    stall_span: 0.004
+    min_travel: 0.03
+    repeat_tolerance: 0.015
+    target_tolerance: 0.01
+    return_min_fraction: 0.5
+    feedback_timeout: 0.12
+  return_duration: null
+  retreats: []
+  gain_source: 'manual: gains are not applied'
+  friction_source: 'disabled: manual calibration has no torque feed-forward'
+  friction_model:
+    coulomb_pos: 0.0
+    coulomb_neg: 0.0
+    viscous: 0.0
+    gain: 0.0
+  identified_at: '2026-09-28T22:26:17'
+  channel: 0
+- name: right_joint_0
+  slot: 0
+  motor_type: DM8009
+  axis_sign: -1.0
+  direction_verified: true
+  zero_offset: 7.9254935852050785
+  raw_at_reference: 4.783893585205078
+  urdf_pos_at_reference: 3.1416
+  limit_side: positive
+  reference_confirmed: true
+  visually_verified: false
+  method: manual
+  motion_settings:
+    stall_torque: 0.5
+    kp: 3.0
+    kd: 1.0
+    max_position_error: 0.2
+    effort_abort: 1.0
+    speed: 0.025
+    max_speed: 0.15
+    hard_max_speed: 0.3
+    overspeed_time: 0.1
+    max_travel: 3.5
+    timeout: 180.0
+    stall_time: 1.0
+    stall_span: 0.004
+    min_travel: 0.03
+    repeat_tolerance: 0.015
+    target_tolerance: 0.01
+    return_min_fraction: 0.5
+    feedback_timeout: 0.12
+  return_duration: null
+  retreats: []
+  gain_source: 'manual: gains are not applied'
+  friction_source: 'disabled: manual calibration has no torque feed-forward'
+  friction_model:
+    coulomb_pos: 0.0
+    coulomb_neg: 0.0
+    viscous: 0.0
+    gain: 0.0
+  identified_at: '2026-09-28T22:40:49'
+  channel: 1
+- name: right_joint_1
+  slot: 1
+  motor_type: DM8009
+  axis_sign: 1.0
+  direction_verified: true
+  zero_offset: 2.1317679489135744
+  raw_at_reference: 1.6954679489135742
+  urdf_pos_at_reference: -0.4363
+  limit_side: negative
+  reference_confirmed: true
+  visually_verified: false
+  method: manual
+  motion_settings:
+    stall_torque: 0.5
+    kp: 3.0
+    kd: 1.0
+    max_position_error: 0.2
+    effort_abort: 1.0
+    speed: 0.025
+    max_speed: 0.15
+    hard_max_speed: 0.3
+    overspeed_time: 0.1
+    max_travel: 3.5
+    timeout: 180.0
+    stall_time: 1.0
+    stall_span: 0.004
+    min_travel: 0.03
+    repeat_tolerance: 0.015
+    target_tolerance: 0.01
+    return_min_fraction: 0.5
+    feedback_timeout: 0.12
+  return_duration: null
+  retreats: []
+  gain_source: 'manual: gains are not applied'
+  friction_source: 'disabled: manual calibration has no torque feed-forward'
+  friction_model:
+    coulomb_pos: 0.0
+    coulomb_neg: 0.0
+    viscous: 0.0
+    gain: 0.0
+  identified_at: '2026-09-28T22:40:15'
+  channel: 1
+- name: right_joint_2
+  slot: 2
+  motor_type: DM4340P
+  axis_sign: 1.0
+  direction_verified: true
+  zero_offset: -2.679360420227051
+  raw_at_reference: -5.297360420227051
+  urdf_pos_at_reference: -2.618
+  limit_side: negative
+  reference_confirmed: true
+  visually_verified: false
+  method: manual
+  motion_settings:
+    stall_torque: 0.5
+    kp: 3.0
+    kd: 1.0
+    max_position_error: 0.2
+    effort_abort: 1.0
+    speed: 0.025
+    max_speed: 0.15
+    hard_max_speed: 0.3
+    overspeed_time: 0.1
+    max_travel: 3.5
+    timeout: 180.0
+    stall_time: 1.0
+    stall_span: 0.004
+    min_travel: 0.03
+    repeat_tolerance: 0.015
+    target_tolerance: 0.01
+    return_min_fraction: 0.5
+    feedback_timeout: 0.12
+  return_duration: null
+  retreats: []
+  gain_source: 'manual: gains are not applied'
+  friction_source: 'disabled: manual calibration has no torque feed-forward'
+  friction_model:
+    coulomb_pos: 0.0
+    coulomb_neg: 0.0
+    viscous: 0.0
+    gain: 0.0
+  identified_at: '2026-09-28T22:39:15'
+  channel: 1
+- name: right_joint_3
+  slot: 3
+  motor_type: DM4340
+  axis_sign: -1.0
+  direction_verified: true
+  zero_offset: -1.3209788044306894
+  raw_at_reference: -2.891775131225586
+  urdf_pos_at_reference: 1.5707963267948966
+  limit_side: positive
+  reference_confirmed: true
+  visually_verified: false
+  method: manual
+  motion_settings:
+    stall_torque: 0.5
+    kp: 3.0
+    kd: 1.0
+    max_position_error: 0.2
+    effort_abort: 1.0
+    speed: 0.025
+    max_speed: 0.15
+    hard_max_speed: 0.3
+    overspeed_time: 0.1
+    max_travel: 3.5
+    timeout: 180.0
+    stall_time: 1.0
+    stall_span: 0.004
+    min_travel: 0.03
+    repeat_tolerance: 0.015
+    target_tolerance: 0.01
+    return_min_fraction: 0.5
+    feedback_timeout: 0.12
+  return_duration: null
+  retreats: []
+  gain_source: 'manual: gains are not applied'
+  friction_source: 'disabled: manual calibration has no torque feed-forward'
+  friction_model:
+    coulomb_pos: 0.0
+    coulomb_neg: 0.0
+    viscous: 0.0
+    gain: 0.0
+  identified_at: '2026-09-28T22:39:41'
+  channel: 1
+- name: right_joint_4
+  slot: 4
+  motor_type: DM4310
+  axis_sign: 1.0
+  direction_verified: true
+  zero_offset: -2.88230517578125
+  raw_at_reference: -5.50030517578125
+  urdf_pos_at_reference: -2.618
+  limit_side: negative
+  reference_confirmed: true
+  visually_verified: false
+  method: manual
+  motion_settings:
+    stall_torque: 0.5
+    kp: 3.0
+    kd: 1.0
+    max_position_error: 0.2
+    effort_abort: 1.0
+    speed: 0.025
+    max_speed: 0.15
+    hard_max_speed: 0.3
+    overspeed_time: 0.1
+    max_travel: 3.5
+    timeout: 180.0
+    stall_time: 1.0
+    stall_span: 0.004
+    min_travel: 0.03
+    repeat_tolerance: 0.015
+    target_tolerance: 0.01
+    return_min_fraction: 0.5
+    feedback_timeout: 0.12
+  return_duration: null
+  retreats: []
+  gain_source: 'manual: gains are not applied'
+  friction_source: 'disabled: manual calibration has no torque feed-forward'
+  friction_model:
+    coulomb_pos: 0.0
+    coulomb_neg: 0.0
+    viscous: 0.0
+    gain: 0.0
+  identified_at: '2026-09-28T22:38:41'
+  channel: 1
+- name: right_joint_5
+  slot: 5
+  motor_type: DM4310
+  axis_sign: 1.0
+  direction_verified: true
+  zero_offset: 2.1226480911254884
+  raw_at_reference: 1.3128480911254883
+  urdf_pos_at_reference: -0.8098
+  limit_side: negative
+  reference_confirmed: true
+  visually_verified: false
+  method: manual
+  motion_settings:
+    stall_torque: 0.5
+    kp: 3.0
+    kd: 1.0
+    max_position_error: 0.2
+    effort_abort: 1.0
+    speed: 0.025
+    max_speed: 0.15
+    hard_max_speed: 0.3
+    overspeed_time: 0.1
+    max_travel: 3.5
+    timeout: 180.0
+    stall_time: 1.0
+    stall_span: 0.004
+    min_travel: 0.03
+    repeat_tolerance: 0.015
+    target_tolerance: 0.01
+    return_min_fraction: 0.5
+    feedback_timeout: 0.12
+  return_duration: null
+  retreats: []
+  gain_source: 'manual: gains are not applied'
+  friction_source: 'disabled: manual calibration has no torque feed-forward'
+  friction_model:
+    coulomb_pos: 0.0
+    coulomb_neg: 0.0
+    viscous: 0.0
+    gain: 0.0
+  identified_at: '2026-09-28T22:38:06'
+  channel: 1
+- name: right_joint_6
+  slot: 6
+  motor_type: DM4310
+  axis_sign: -1.0
+  direction_verified: true
+  zero_offset: 1.7749317352294922
+  raw_at_reference: 3.345731735229492
+  urdf_pos_at_reference: -1.5708
+  limit_side: negative
+  reference_confirmed: true
+  visually_verified: false
+  method: manual
+  motion_settings:
+    stall_torque: 0.5
+    kp: 3.0
+    kd: 1.0
+    max_position_error: 0.2
+    effort_abort: 1.0
+    speed: 0.025
+    max_speed: 0.15
+    hard_max_speed: 0.3
+    overspeed_time: 0.1
+    max_travel: 3.5
+    timeout: 180.0
+    stall_time: 1.0
+    stall_span: 0.004
+    min_travel: 0.03
+    repeat_tolerance: 0.015
+    target_tolerance: 0.01
+    return_min_fraction: 0.5
+    feedback_timeout: 0.12
+  return_duration: null
+  retreats: []
+  gain_source: 'manual: gains are not applied'
+  friction_source: 'disabled: manual calibration has no torque feed-forward'
+  friction_model:
+    coulomb_pos: 0.0
+    coulomb_neg: 0.0
+    viscous: 0.0
+    gain: 0.0
+  identified_at: '2026-09-28T22:37:35'
+  channel: 1
