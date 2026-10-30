@@ -29,7 +29,7 @@ ros2 launch ieir_bringup ui.launch.py workspace:=/home/venom/dual_arm_robot port
 
 打开 http://127.0.0.1:8766/，选择右臂、确认启动控制端，再切关节位置模式。应有JS broadcaster、GC、JPC三个控制器active。打开网页本身不使能；启动控制端会使能。无支撑时不能停止GC、其管理网页进程或bridge。
 
-C健康器、D适配器、E模型8081、F末端8082命令见完整手册。默认模型副本已保存到FACTR2的`models/w3/right/c2_20261010/`。
+C健康器、D适配器、E模型8081、F关节外力矩8082命令见完整手册。2026-10-23起外力窗口默认显示论文中的J1–J7外部关节力矩（N·m），启动与重启见[关节力矩窗口说明](/home/venom/factr2/docs/operator_guide/JOINT_TORQUE_WINDOW_20261023.md)。下述模型副本记录为10月10日历史状态：`models/w3/right/c2_20261010/`。
 
 原来的七个本机标定文件另备份于`log/backups/work_20261010/`（被Git忽略），manifest.json记录SHA。本次未修改标定；恢复到其它机器需使用该机器实际标定，不能直接套用本机零偏。
 
