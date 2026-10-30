@@ -1,6 +1,6 @@
 # W3 Dual Arm Workspace
 
-这是 `Ding141/dual_arm_robot`，负责 W3 双臂机械臂的 CAN bridge、ros2_control、真机启动和控制接口。
+本仓库负责 W3 双臂机械臂的 CAN bridge、ros2_control、真机启动和控制接口。工作源码的原远程为 `Ding141/dual_arm_robot`；本轮成果另发布至用户指定的 [venom049/dual_arm_robot 成果分支](https://github.com/venom049/dual_arm_robot/tree/codex/work-results-20261030)，保留该仓库原有main。
 
 截至2026-10-30，本轮反馈新鲜度、最新反馈读取及测试说明见 [FEEDBACK_LATEST_20261019.md](docs/FEEDBACK_LATEST_20261019.md)。NEXT训练、模型、补偿与实机波形结果保存在配套仓库的[成果总入口](https://github.com/Ding141/factr2/blob/liyq-dev/results/20261030/README.md)。
 
