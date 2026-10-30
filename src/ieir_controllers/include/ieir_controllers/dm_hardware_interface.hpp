@@ -2,6 +2,7 @@
 #define IEIR_CONTROLLERS__DM_HARDWARE_INTERFACE_HPP_
 
 #include <map>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -15,6 +16,8 @@
 #include "rclcpp_lifecycle/state.hpp"
 #include "w3_robot_bridge/msg/motor_command_array.hpp"
 #include "w3_robot_bridge/msg/motor_state_array.hpp"
+#include "sensor_msgs/msg/joint_state.hpp"
+#include "realtime_tools/realtime_publisher.hpp"
 
 namespace ieir_controllers
 {
@@ -58,6 +61,7 @@ namespace ieir_controllers
  *   <param name="offsets_yaml">/abs/path/to/joint_offsets.yaml</param>
  *   <param name="auto_enable">true</param>           (default true)
  *   <param name="motor_topic_ns">/w3_robot_bridge_node</param>      (default)
+ *   <param name="feedback_max_age_s">0.05</param> (monitor/publication gate)
  */
 class DMHardwareInterface : public hardware_interface::SystemInterface
 {
@@ -130,6 +134,9 @@ private:
   void on_motor_state(const w3_robot_bridge::msg::MotorStateArray::SharedPtr msg);
   void publish_enable_all(bool enable);
   void publish_zero_command_all();
+  void poll_feedback();
+  void refresh_feedback_metadata();
+  void publish_feedback_state();
 
   // ---- joint config (parallel arrays sized n_joints_) ----
   std::vector<JointCfg> joints_;
@@ -141,6 +148,16 @@ private:
   std::vector<double> state_pos_;
   std::vector<double> state_vel_;
   std::vector<double> state_eff_;
+  // Bridge publication timestamps, NOT device acquisition timestamps.
+  std::vector<int64_t> feedback_source_ns_;
+  std::vector<int64_t> feedback_receive_steady_ns_;
+  std::vector<bool> feedback_packet_valid_;
+  std::vector<double> feedback_source_time_;
+  std::vector<double> feedback_source_age_;
+  std::vector<double> feedback_receive_age_;
+  std::vector<double> feedback_valid_;
+  int64_t latest_frame_stamp_ns_{0};
+  int64_t published_frame_stamp_ns_{0};
 
   // ---- command storage (URDF frame, ros2_control writes into these) ----
   std::vector<double> cmd_pos_;
@@ -151,8 +168,11 @@ private:
 
   // ---- ROS plumbing ----
   rclcpp::Node::SharedPtr node_;
+  std::unique_ptr<rclcpp::executors::SingleThreadedExecutor> feedback_executor_;
   rclcpp::Subscription<w3_robot_bridge::msg::MotorStateArray>::SharedPtr state_sub_;
   rclcpp::Publisher<w3_robot_bridge::msg::MotorCommandArray>::SharedPtr cmd_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr feedback_pub_;
+  std::unique_ptr<realtime_tools::RealtimePublisher<sensor_msgs::msg::JointState>> feedback_rt_pub_;
   std::map<int, bool> state_seen_;
   // Per-joint W3 error_flags from the last finite, online frame.
   // -1 means "no real state observed yet". DM motor state code:
@@ -172,6 +192,8 @@ private:
   std::string offsets_yaml_path_;
   std::string motor_topic_ns_{"/w3_robot_bridge_node"};
   bool auto_enable_{true};
+  // Metadata/publication gate only; never disables motors or controllers.
+  double feedback_max_age_s_{0.05};
 
   // When set to true by on_deactivate, write() emits zero-cmd frames
   // instead of the live cmd_* values. Once the motor is disabled it stops

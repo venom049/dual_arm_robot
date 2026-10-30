@@ -171,6 +171,8 @@ ament_target_dependencies(dm_hardware_interface
   hardware_interface
   pluginlib
   w3_robot_bridge
+  sensor_msgs
+  realtime_tools
 )
 
 # Export controller plugins
@@ -298,6 +300,12 @@ install(FILES
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(dm_feedback_latest test/test_dm_feedback_latest.cpp TIMEOUT 45)
+  target_link_libraries(dm_feedback_latest dm_hardware_interface)
+  ament_target_dependencies(dm_feedback_latest rclcpp rclcpp_lifecycle hardware_interface
+    w3_robot_bridge sensor_msgs realtime_tools)
+  set_tests_properties(dm_feedback_latest PROPERTIES ENVIRONMENT
+    "ROS_DOMAIN_ID=196;ROS_LOCALHOST_ONLY=1;RMW_IMPLEMENTATION=rmw_fastrtps_cpp;LD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR}:$ENV{LD_LIBRARY_PATH}")
   add_executable(command_state_mock test/command_state_mock.cpp)
   target_link_libraries(command_state_mock joint_position_controller)
   ament_target_dependencies(command_state_mock rclcpp rclcpp_lifecycle controller_interface

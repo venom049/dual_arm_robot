@@ -189,6 +189,15 @@ hardware_interface::CallbackReturn DMHardwareInterface::on_init(
   }
 
   // ---- per-joint params ----
+  if (auto it = info_.hardware_parameters.find("feedback_max_age_s");
+      it != info_.hardware_parameters.end()) {
+    if (!parse_double(it->second, feedback_max_age_s_) ||
+        !std::isfinite(feedback_max_age_s_) || feedback_max_age_s_ <= 0.0) {
+      RCLCPP_ERROR(rclcpp::get_logger("DMHardwareInterface"), "Invalid feedback_max_age_s");
+      return hardware_interface::CallbackReturn::ERROR;
+    }
+  }
+
   joints_.clear();
   joints_.reserve(info_.joints.size());
   joint_name_to_index_.clear();
@@ -273,6 +282,13 @@ hardware_interface::CallbackReturn DMHardwareInterface::on_init(
   state_pos_.assign(n, 0.0);
   state_vel_.assign(n, 0.0);
   state_eff_.assign(n, 0.0);
+  feedback_source_ns_.assign(n, 0);
+  feedback_receive_steady_ns_.assign(n, 0);
+  feedback_packet_valid_.assign(n, false);
+  feedback_source_time_.assign(n, std::numeric_limits<double>::quiet_NaN());
+  feedback_source_age_.assign(n, std::numeric_limits<double>::infinity());
+  feedback_receive_age_.assign(n, std::numeric_limits<double>::infinity());
+  feedback_valid_.assign(n, 0.0);
   cmd_pos_.assign(n, 0.0);
   cmd_vel_.assign(n, 0.0);
   cmd_eff_.assign(n, 0.0);
@@ -302,19 +318,38 @@ hardware_interface::CallbackReturn DMHardwareInterface::on_init(
 hardware_interface::CallbackReturn DMHardwareInterface::on_configure(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
+  // All callbacks stay on the hardware owner thread. No new shared state races.
+  feedback_executor_.reset();
+  feedback_rt_pub_.reset();
   node_ = std::make_shared<rclcpp::Node>("dm_hardware_interface");
 
   const std::string state_t = motor_topic_ns_ + "/state";
   const std::string cmd_t = motor_topic_ns_ + "/commands";
-  rclcpp::QoS qos(rclcpp::KeepLast(50));
-  qos.best_effort();
+  const auto feedback_qos = rclcpp::QoS(rclcpp::KeepLast(1)).best_effort().durability_volatile();
 
   state_sub_ = node_->create_subscription<w3_robot_bridge::msg::MotorStateArray>(
-    state_t, qos,
+    state_t, feedback_qos,
     [this](w3_robot_bridge::msg::MotorStateArray::SharedPtr msg) {
       on_motor_state(msg);
     });
-  cmd_pub_ = node_->create_publisher<w3_robot_bridge::msg::MotorCommandArray>(cmd_t, qos);
+  cmd_pub_ = node_->create_publisher<w3_robot_bridge::msg::MotorCommandArray>(
+    cmd_t, rclcpp::QoS(50).best_effort());
+  feedback_pub_ = node_->create_publisher<sensor_msgs::msg::JointState>(
+    "~/feedback_state", feedback_qos);
+  feedback_rt_pub_ = std::make_unique<realtime_tools::RealtimePublisher<sensor_msgs::msg::JointState>>(
+    feedback_pub_);
+  auto & output = feedback_rt_pub_->msg_;
+  for (const auto & joint : joints_) output.name.push_back(joint.name);
+  output.position.resize(joints_.size());
+  output.velocity.resize(joints_.size());
+  output.effort.resize(joints_.size());
+  feedback_executor_ = std::make_unique<rclcpp::executors::SingleThreadedExecutor>();
+  feedback_executor_->add_node(node_);
+  latest_frame_stamp_ns_ = published_frame_stamp_ns_ = 0;
+  std::fill(feedback_source_ns_.begin(), feedback_source_ns_.end(), 0);
+  std::fill(feedback_receive_steady_ns_.begin(), feedback_receive_steady_ns_.end(), 0);
+  std::fill(feedback_packet_valid_.begin(), feedback_packet_valid_.end(), false);
+  refresh_feedback_metadata();
 
   for (int ch : unique_channels_) {
     state_seen_[ch] = false;
@@ -329,11 +364,15 @@ std::vector<hardware_interface::StateInterface>
 DMHardwareInterface::export_state_interfaces()
 {
   std::vector<hardware_interface::StateInterface> out;
-  out.reserve(joints_.size() * 3);
+  out.reserve(joints_.size() * 7);
   for (size_t i = 0; i < joints_.size(); ++i) {
     out.emplace_back(joints_[i].name, hardware_interface::HW_IF_POSITION, &state_pos_[i]);
     out.emplace_back(joints_[i].name, hardware_interface::HW_IF_VELOCITY, &state_vel_[i]);
     out.emplace_back(joints_[i].name, hardware_interface::HW_IF_EFFORT,   &state_eff_[i]);
+    out.emplace_back(joints_[i].name, "feedback_source_time", &feedback_source_time_[i]);
+    out.emplace_back(joints_[i].name, "feedback_source_age", &feedback_source_age_[i]);
+    out.emplace_back(joints_[i].name, "feedback_receive_age", &feedback_receive_age_[i]);
+    out.emplace_back(joints_[i].name, "feedback_valid", &feedback_valid_[i]);
   }
   return out;
 }
@@ -420,7 +459,7 @@ hardware_interface::CallbackReturn DMHardwareInterface::on_activate(
               "%zu joint(s) report err=%d (timeout %.1fs)...",
               joints_.size(), DM_ERR_ENABLED, timeout_s);
   while (rclcpp::ok()) {
-    rclcpp::spin_some(node_);
+    poll_feedback();
     const auto now = std::chrono::steady_clock::now();
     const double elapsed_s = std::chrono::duration<double>(now - t0).count();
     if (elapsed_s > timeout_s) break;
@@ -431,7 +470,7 @@ hardware_interface::CallbackReturn DMHardwareInterface::on_activate(
     publish_zero_command_all();
     bool all_enabled = true;
     for (size_t i = 0; i < joints_.size(); ++i) {
-      if (last_err_[i] != DM_ERR_ENABLED) {
+      if (last_err_[i] != DM_ERR_ENABLED || feedback_valid_[i] != 1.0) {
         all_enabled = false;
         break;
       }
@@ -448,11 +487,11 @@ hardware_interface::CallbackReturn DMHardwareInterface::on_activate(
   // ros2_control surfaces the error to the user.
   std::string offenders;
   for (size_t i = 0; i < joints_.size(); ++i) {
-    if (last_err_[i] != DM_ERR_ENABLED) {
+    if (last_err_[i] != DM_ERR_ENABLED || feedback_valid_[i] != 1.0) {
       if (!offenders.empty()) offenders += ", ";
       char buf[64];
-      std::snprintf(buf, sizeof(buf), "%s(err=%d)",
-                    joints_[i].name.c_str(), last_err_[i]);
+      std::snprintf(buf, sizeof(buf), "%s(err=%d,fresh=%d)",
+                    joints_[i].name.c_str(), last_err_[i], feedback_valid_[i] == 1.0);
       offenders += buf;
     }
   }
@@ -502,7 +541,7 @@ hardware_interface::CallbackReturn DMHardwareInterface::on_deactivate(
               "(timeout %.1fs)...",
               1.0 / publish_period_s, joints_.size(), DM_ERR_DISABLED, timeout_s);
   while (rclcpp::ok()) {
-    rclcpp::spin_some(node_);
+    poll_feedback();
     const auto now = std::chrono::steady_clock::now();
     const double elapsed_s = std::chrono::duration<double>(now - t0).count();
     if (elapsed_s > timeout_s) break;
@@ -512,7 +551,7 @@ hardware_interface::CallbackReturn DMHardwareInterface::on_deactivate(
     }
     bool all_off = true;
     for (size_t i = 0; i < joints_.size(); ++i) {
-      if (last_err_[i] != DM_ERR_DISABLED) {
+      if (last_err_[i] != DM_ERR_DISABLED || feedback_valid_[i] != 1.0) {
         all_off = false;
         break;
       }
@@ -530,11 +569,11 @@ hardware_interface::CallbackReturn DMHardwareInterface::on_deactivate(
   // whether to power-cycle the affected motor.
   std::string offenders;
   for (size_t i = 0; i < joints_.size(); ++i) {
-    if (last_err_[i] != DM_ERR_DISABLED) {
+    if (last_err_[i] != DM_ERR_DISABLED || feedback_valid_[i] != 1.0) {
       if (!offenders.empty()) offenders += ", ";
       char buf[64];
-      std::snprintf(buf, sizeof(buf), "%s(err=%d)",
-                    joints_[i].name.c_str(), last_err_[i]);
+      std::snprintf(buf, sizeof(buf), "%s(err=%d,fresh=%d)",
+                    joints_[i].name.c_str(), last_err_[i], feedback_valid_[i] == 1.0);
       offenders += buf;
     }
   }
@@ -547,6 +586,16 @@ hardware_interface::CallbackReturn DMHardwareInterface::on_deactivate(
 void DMHardwareInterface::on_motor_state(
   const w3_robot_bridge::msg::MotorStateArray::SharedPtr msg)
 {
+  if (msg->header.stamp.sec < 0 || msg->header.stamp.nanosec >= 1000000000U) return;
+  const int64_t source_ns = int64_t(msg->header.stamp.sec) * 1000000000LL + msg->header.stamp.nanosec;
+  const auto now_ros_ns = node_->get_clock()->now().nanoseconds();
+  // Do not roll back a newer cache or invent a time for an unstamped packet.
+  if (source_ns <= 0 || source_ns <= latest_frame_stamp_ns_ || source_ns > now_ros_ns ||
+      (now_ros_ns - source_ns) * 1e-9 > feedback_max_age_s_) return;
+  latest_frame_stamp_ns_ = source_ns;
+  const auto received_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
+    std::chrono::steady_clock::now().time_since_epoch()).count();
+  std::fill(feedback_packet_valid_.begin(), feedback_packet_valid_.end(), false);
   for (const auto & m : msg->motors) {
     const int ch = static_cast<int>(m.channel);
     state_seen_[ch] = true;
@@ -563,14 +612,67 @@ void DMHardwareInterface::on_motor_state(
           !std::isfinite(m.velocity) || !std::isfinite(m.torque)) {
         continue;
       }
+      if (m.header.stamp.sec < 0 || m.header.stamp.nanosec >= 1000000000U) continue;
+      const int64_t motor_stamp = int64_t(m.header.stamp.sec) * 1000000000LL + m.header.stamp.nanosec;
+      const auto motor_source_ns = motor_stamp > 0 ? motor_stamp : source_ns;
+      if (motor_source_ns <= feedback_source_ns_[idx] || motor_source_ns > now_ros_ns ||
+          (now_ros_ns - motor_source_ns) * 1e-9 > feedback_max_age_s_) continue;
       last_err_[idx] = static_cast<int>(m.error_flags);
       last_pos_raw_[idx] = static_cast<double>(m.position);
       state_pos_[idx] = raw_to_urdf_pos(j, static_cast<double>(m.position));
       state_vel_[idx] = j.axis_sign * static_cast<double>(m.velocity);
       state_eff_[idx] = j.axis_sign * static_cast<double>(m.torque);
+      feedback_source_ns_[idx] = motor_source_ns;
+      feedback_receive_steady_ns_[idx] = received_ns;
+      feedback_packet_valid_[idx] = true;
       break;
     }
   }
+}
+
+void DMHardwareInterface::refresh_feedback_metadata()
+{
+  const auto now_ros_ns = node_->get_clock()->now().nanoseconds();
+  const auto now_steady_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
+    std::chrono::steady_clock::now().time_since_epoch()).count();
+  for (size_t i = 0; i < joints_.size(); ++i) {
+    const bool seen = feedback_source_ns_[i] > 0;
+    feedback_source_time_[i] = seen ? feedback_source_ns_[i] * 1e-9 :
+      std::numeric_limits<double>::quiet_NaN();
+    feedback_source_age_[i] = seen ? (now_ros_ns - feedback_source_ns_[i]) * 1e-9 :
+      std::numeric_limits<double>::infinity();
+    feedback_receive_age_[i] = seen ? (now_steady_ns - feedback_receive_steady_ns_[i]) * 1e-9 :
+      std::numeric_limits<double>::infinity();
+    feedback_valid_[i] = feedback_packet_valid_[i] && feedback_source_age_[i] >= 0.0 &&
+      feedback_source_age_[i] <= feedback_max_age_s_ &&
+      feedback_receive_age_[i] <= feedback_max_age_s_ ? 1.0 : 0.0;
+  }
+}
+
+void DMHardwareInterface::publish_feedback_state()
+{
+  if (latest_frame_stamp_ns_ <= published_frame_stamp_ns_ || joints_.empty() ||
+      !std::all_of(feedback_valid_.begin(), feedback_valid_.end(), [](double x) {return x == 1.0;})) return;
+  if (!feedback_rt_pub_->trylock()) return;
+  auto & output = feedback_rt_pub_->msg_;
+  // W3 currently stamps all joints with array publication time. For a future
+  // mixed snapshot, conservatively label it with its oldest joint source.
+  const auto stamp_ns = *std::min_element(feedback_source_ns_.begin(), feedback_source_ns_.end());
+  output.header.stamp.sec = static_cast<int32_t>(stamp_ns / 1000000000LL);
+  output.header.stamp.nanosec = static_cast<uint32_t>(stamp_ns % 1000000000LL);
+  std::copy(state_pos_.begin(), state_pos_.end(), output.position.begin());
+  std::copy(state_vel_.begin(), state_vel_.end(), output.velocity.begin());
+  std::copy(state_eff_.begin(), state_eff_.end(), output.effort.begin());
+  published_frame_stamp_ns_ = latest_frame_stamp_ns_;
+  feedback_rt_pub_->unlockAndPublish();
+}
+
+void DMHardwareInterface::poll_feedback()
+{
+  // Collect readiness once; no unbounded draining of a growing FIFO.
+  feedback_executor_->spin_some(std::chrono::nanoseconds(0));
+  refresh_feedback_metadata();
+  publish_feedback_state();
 }
 
 hardware_interface::return_type DMHardwareInterface::read(
@@ -579,7 +681,7 @@ hardware_interface::return_type DMHardwareInterface::read(
   // State interfaces are populated in on_motor_state (sentinel-filtered);
   // here we just dispatch any pending state messages so the cache is
   // up-to-date before controllers' update() runs.
-  rclcpp::spin_some(node_);
+  poll_feedback();
   return hardware_interface::return_type::OK;
 }
 
